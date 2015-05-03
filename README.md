@@ -15,6 +15,6 @@ Internet Links
 
 * How can I change the date modified/created of a file? : http://askubuntu.com/questions/62492/how-can-i-change-the-date-modified-created-of-a-file
 
--> sudo nano /etc/udev/rules.d/99-sd-autocopy.rules
--> sudo nano /usr/local/bin/sd-autocopy
--> sudo chmod +x /usr/local/bin/sd-autocopy
+* sudo nano /etc/udev/rules.d/99-sd-autocopy.rules
+* sudo nano /usr/local/bin/sd-autocopy
+* sudo chmod +x /usr/local/bin/sd-autocopy
