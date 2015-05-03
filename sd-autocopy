@@ -1,0 +1,57 @@
+#!/bin/bash
+{
+ 
+USER=pi
+TARGET=/home/$USER/Pictures/Photos
+MOUNT=/mnt/sd-autocopy
+FILE_MATCH=".*\.(jpg|cr2|png|jpeg|mp4)$"
+TRANSFER=cp
+ 
+if [ ! -d "$MOUNT" ]; then
+    mkdir -p "$MOUNT"
+fi
+ 
+mount $DEVNAME "$MOUNT"
+
+echo "###### COMMANDE FIND #######" >> /tmp/test
+echo "find $MOUNT -regextype posix-egrep -iregex $FILE_MATCH -printf %TY-%Tm_%p\n" >> /tmp/test
+
+ 
+LINES=$(find "$MOUNT" -regextype posix-egrep -iregex "$FILE_MATCH" -printf "%TY-%Tm_%p\n")
+DATES=$(echo "$LINES" | cut -d_ -f1 | uniq)
+
+echo "Lines : $LINES" >> /tmp/test
+echo "Dates : $DATES" >> /tmp/test
+
+# First create the directories when missing
+for DATE in $DATES; do
+    echo $DATE
+    mkdir -p "$TARGET/$DATE"
+
+    echo "### $DATE" >> /tmp/test
+done
+ 
+# Move the images
+NUM=0
+for LINE in $LINES; do
+    DATE=${LINE%%_*}
+    FILE=${LINE#*_}
+    logger -t sd-autocopy "Moving $FILE to $TARGET/$DATE"
+    $TRANSFER "$FILE" "$TARGET/$DATE"
+    NUM=$(($NUM+1))
+    echo "New File : $FILE" >> /tmp/test
+done
+ 
+umount $DEVNAME
+ 
+# Fix the permissions for all directories recursive where
+# files have been copied/moved to
+for DATE in $DATES; do
+    chown -R $USER.$USER "$TARGET/$DATE"
+done
+ 
+logger -t sd-autocopy "Finished job. Moved $NUM images."
+echo "Finished job. Moved $NUM images" >> /tmp/test
+
+} &
+exit 0
